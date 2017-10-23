@@ -37,7 +37,7 @@ def param_init(net, stddev=None):
         net.initialize(mx.init.Normal(stddev), ctx=ctx)
 
 
-def train(netG, netD, netE, dataset, epochs=10, continued=False):
+def train(netG, netD, netE, batches, epochs=10, continued=False):
     gan_loss = gluon.loss.SigmoidBinaryCrossEntropyLoss()
 
     # Initialize all networks
@@ -63,8 +63,8 @@ def train(netG, netD, netE, dataset, epochs=10, continued=False):
     start = time.time()
     for epoch in range(epochs):
         print(f"Epoch {epoch}----------")
-        for n in range(0, dataset.num_batches):
-            real_images, wrong_images, real_captions, noise = dataset.get_batch(batch_num=n, batch_size=batch_size, z=z)
+        for n, batch in enumerate(batches):
+            real_images, wrong_images, real_captions, noise = batch
 
             ############################
             # (1) Update D network: maximize log(D(x, y)) + log(1 - D(x, G(x, z)))
@@ -87,11 +87,11 @@ def train(netG, netD, netE, dataset, epochs=10, continued=False):
                 errD_fake = gan_loss(out_d_fake, fake_label)
                 metric.update([fake_label, ], [out_d_fake, ])
 
-                errD = errD_real + errD_wrong + errD_fake
+                errD = errD_real + 0.5 * errD_wrong + 0.5 * errD_fake
                 errD.backward()
 
             trainerD.step(batch_size)
-
+            # trainerE.step(batch_size)
             ############################
             # (2) Update G network: maximize log(D(G(z)))
             ###########################
@@ -101,8 +101,9 @@ def train(netG, netD, netE, dataset, epochs=10, continued=False):
                 output = netD([out_g, out_e])
                 errG = gan_loss(output, real_label)
                 errG.backward()
+
             trainerG.step(batch_size)
-            trainerE.step(batch_size)
+            # trainerE.step(batch_size)
 
             if n % 10 == 0:
                 name, acc = metric.get()
@@ -128,8 +129,9 @@ if __name__ == '__main__':
     print("1. Train\n2. Continue to Train")
     c = int(input())
     dataset = SmallDataset(batch_size)
+    batches = dataset.load_all_batches(z, ctx)
     netG, netD, netE = build_gan(len(vocab), embed_size, text_embed_dims)
     if c == 1:
-        train(netG, netD, netE, dataset, epochs=40)
+        train(netG, netD, netE, batches, epochs=50)
     elif c == 2:
-        train(netG, netD, netE, dataset, epochs=10, continued=False)
+        train(netG, netD, netE, batches, epochs=10, continued=False)
