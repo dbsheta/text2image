@@ -12,7 +12,7 @@ def load_image_array(img_dir, image_file, image_size):
     img_resized = np.array(img_resized, dtype="float32")
     # GRAYSCALE
     if len(img_resized.shape) == 2:
-        img_new = np.ndarray((img.shape[0], img.shape[1], 3), dtype='uint8')
+        img_new = np.ndarray((img.shape[0], img.shape[1], 3))
         img_new[:, :, 0] = img
         img_new[:, :, 1] = img
         img_new[:, :, 2] = img
@@ -59,10 +59,9 @@ def build_dataset(max_seq_len, data_dir, img_dims):
     img_dir = os.path.join(data_dir, 'jpg')
     caption_dir = os.path.join(data_dir, 'text/text_c10')
 
-    imgs = preprocess_images(data_dir, img_dims)
-    with open('processed_imgs.pkl', 'wb') as f:
-        pickle.dump(imgs, f)
-
+    # imgs = preprocess_images(data_dir, img_dims)
+    # with open('data/processed_imgs.pkl', 'wb') as f:
+    #     pickle.dump(imgs, f)
     captions_dict, captions = get_captions(img_dir, caption_dir)
     print(f"Total Captions: {len(captions)}")
     tokenizer = Tokenizer()
@@ -83,6 +82,8 @@ def build_dataset(max_seq_len, data_dir, img_dims):
         pickle.dump(word2ix, f)
 
 
-imgs = preprocess_images("/Users/dhoomilbsheta/Development/datasets/flowers", 64)
-with open('processed_imgs.pkl', 'wb') as f:
-    pickle.dump(imgs, f)
+# imgs = preprocess_images("D://Development/dataset/flower", 64)
+# with open('processed_imgs.pkl', 'wb') as f:
+#     pickle.dump(imgs, f)
+
+build_dataset(50, "D:/Development/dataset/flower", 64)
