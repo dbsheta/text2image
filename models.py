@@ -70,7 +70,6 @@ class Discriminator(gluon.Block):
             self.conv4 = nn.Conv2D(n_dims * 8, 4, 2, 1)
             self.conv5 = nn.Conv2D(n_dims * 8, 4, 2, 1)
 
-            self.conv1_bnorm = nn.BatchNorm()
             self.conv2_bnorm = nn.BatchNorm()
             self.conv3_bnorm = nn.BatchNorm()
             self.conv4_bnorm = nn.BatchNorm()
@@ -87,7 +86,7 @@ class Discriminator(gluon.Block):
     def forward(self, x, *args, **kwargs):
         _image = x[0]
         _text_embed = x[1]
-        x = self.conv1_lrelu(self.conv1_bnorm(self.conv1(_image)))
+        x = self.conv1_lrelu(self.conv1(_image))
         x = self.conv2_lrelu(self.conv2_bnorm(self.conv2(x)))
         x = self.conv3_lrelu(self.conv3_bnorm(self.conv3(x)))
         x = self.conv4_lrelu(self.conv4_bnorm(self.conv4(x)))
